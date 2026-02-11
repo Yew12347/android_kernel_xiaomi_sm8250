@@ -551,7 +551,8 @@ static int rtentry_to_fib_config(struct net *net, int cmd, struct rtentry *rt,
 	if (rt->rt_gateway.sa_family == AF_INET && addr) {
 		unsigned int addr_type;
 
-		cfg->fc_gw = addr;
+		cfg->fc_gw4 = addr;
+		cfg->fc_gw_family = AF_INET;
 		addr_type = inet_addr_type_table(net, addr, cfg->fc_table);
 		if (rt->rt_flags & RTF_GATEWAY &&
 		    addr_type == RTN_UNICAST)
@@ -564,7 +565,7 @@ static int rtentry_to_fib_config(struct net *net, int cmd, struct rtentry *rt,
 	if (cmd == SIOCDELRT)
 		return 0;
 
-	if (rt->rt_flags & RTF_GATEWAY && !cfg->fc_gw)
+	if (rt->rt_flags & RTF_GATEWAY && !cfg->fc_gw_family)
 		return -EINVAL;
 
 	if (cfg->fc_scope == RT_SCOPE_NOWHERE)
@@ -668,8 +669,8 @@ static int rtm_to_fib_config(struct net *net, struct sk_buff *skb,
 	int err, remaining;
 	struct rtmsg *rtm;
 
-	err = nlmsg_validate(nlh, sizeof(*rtm), RTA_MAX, rtm_ipv4_policy,
-			     extack);
+	err = nlmsg_validate_deprecated(nlh, sizeof(*rtm), RTA_MAX,
+					rtm_ipv4_policy, extack);
 	if (err < 0)
 		goto errout;
 
@@ -704,7 +705,8 @@ static int rtm_to_fib_config(struct net *net, struct sk_buff *skb,
 			cfg->fc_oif = nla_get_u32(attr);
 			break;
 		case RTA_GATEWAY:
-			cfg->fc_gw = nla_get_be32(attr);
+			cfg->fc_gw_family = AF_INET;
+			cfg->fc_gw4 = nla_get_be32(attr);
 			break;
 		case RTA_VIA:
 			NL_SET_ERR_MSG(extack, "IPv4 does not support RTA_VIA attribute");
@@ -834,8 +836,8 @@ int ip_valid_fib_dump_req(struct net *net, const struct nlmsghdr *nlh,
 	filter->rt_type  = rtm->rtm_type;
 	filter->table_id = rtm->rtm_table;
 
-	err = nlmsg_parse_strict(nlh, sizeof(*rtm), tb, RTA_MAX,
-				 rtm_ipv4_policy, extack);
+	err = nlmsg_parse_deprecated_strict(nlh, sizeof(*rtm), tb, RTA_MAX,
+					    rtm_ipv4_policy, extack);
 	if (err < 0)
 		return err;
 
