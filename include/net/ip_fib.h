@@ -32,11 +32,10 @@ struct fib_config {
 	u8			fc_protocol;
 	u8			fc_scope;
 	u8			fc_type;
-	u8			fc_gw_family;
-	/* 2 bytes unused */
+	/* 3 bytes unused */
 	u32			fc_table;
 	__be32			fc_dst;
-	__be32			fc_gw4;
+	__be32			fc_gw;
 	int			fc_oif;
 	u32			fc_flags;
 	u32			fc_priority;
@@ -146,7 +145,6 @@ struct fib_info {
 #define fib_rtt fib_metrics->metrics[RTAX_RTT-1]
 #define fib_advmss fib_metrics->metrics[RTAX_ADVMSS-1]
 	int			fib_nhs;
-	bool			fib_nh_is_v6;
 	struct rcu_head		rcu;
 	struct fib_nh		fib_nh[0];
 #define fib_dev		fib_nh[0].fib_nh_dev
@@ -197,8 +195,7 @@ static inline struct fib_nh_common *fib_info_nhc(struct fib_info *fi, int nhsel)
 #define FIB_TABLE_HASHSZ 2
 #endif
 
-__be32 fib_info_update_nh_saddr(struct net *net, struct fib_nh *nh,
-				unsigned char scope);
+__be32 fib_info_update_nh_saddr(struct net *net, struct fib_nh *nh);
 __be32 fib_result_prefsrc(struct net *net, struct fib_result *res);
 
 #define FIB_RES_NHC(res)		((res).nhc)
@@ -423,14 +420,11 @@ int fib_sync_down_dev(struct net_device *dev, unsigned long event, bool force);
 int fib_sync_down_addr(struct net_device *dev, __be32 local);
 int fib_sync_up(struct net_device *dev, unsigned int nh_flags);
 void fib_sync_mtu(struct net_device *dev, u32 orig_mtu);
-void fib_nhc_update_mtu(struct fib_nh_common *nhc, u32 new, u32 orig);
 
 #ifdef CONFIG_IP_ROUTE_MULTIPATH
 int fib_multipath_hash(const struct net *net, const struct flowi4 *fl4,
 		       const struct sk_buff *skb, struct flow_keys *flkeys);
 #endif
-int fib_check_nh(struct net *net, struct fib_nh *nh, u32 table, u8 scope,
-		 struct netlink_ext_ack *extack);
 void fib_select_multipath(struct fib_result *res, int hash);
 void fib_select_path(struct net *net, struct fib_result *res,
 		     struct flowi4 *fl4, const struct sk_buff *skb);

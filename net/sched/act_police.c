@@ -91,8 +91,7 @@ static int tcf_police_init(struct net *net, struct nlattr *nla,
 	if (nla == NULL)
 		return -EINVAL;
 
-	err = nla_parse_nested_deprecated(tb, TCA_POLICE_MAX, nla,
-					  police_policy, NULL);
+	err = nla_parse_nested(tb, TCA_POLICE_MAX, nla, police_policy, NULL);
 	if (err < 0)
 		return err;
 

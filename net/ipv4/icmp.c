@@ -1178,9 +1178,9 @@ void icmp_err(struct sk_buff *skb, u32 info)
 	}
 
 	if (type == ICMP_DEST_UNREACH && code == ICMP_FRAG_NEEDED)
-		ipv4_update_pmtu(skb, net, info, 0, IPPROTO_ICMP);
+		ipv4_update_pmtu(skb, net, info, 0, 0, IPPROTO_ICMP, 0);
 	else if (type == ICMP_REDIRECT)
-		ipv4_redirect(skb, net, 0, IPPROTO_ICMP);
+		ipv4_redirect(skb, net, 0, 0, IPPROTO_ICMP, 0);
 }
 
 /*
