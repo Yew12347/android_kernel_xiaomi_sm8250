@@ -1,0 +1,40 @@
+name: Diff Linux 4.19 vs Android16 6.12
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout a clean workspace
+        run: |
+          mkdir work
+          cd work
+
+      - name: Clone ACK common Linux-4.19 tree
+        run: |
+          git clone --depth=1 \
+            --branch upstream-linux-4.19.y \
+            --single-branch \
+            https://android.googlesource.com/kernel/common \
+            aosp-4.19
+
+      - name: Clone newer ACK Android16-6.12
+        run: |
+          git clone --depth=1 \
+            --branch android16-6.12-2025-12_r22 \
+            --single-branch \
+            https://android.googlesource.com/kernel/common \
+            aosp-6.12
+
+      - name: Generate full diff patch
+        run: |
+          git diff --no-index aosp-4.19 aosp-6.12 > ack_4.19_to_6.12.patch || true
+
+      - name: Upload diff patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux419_vs_android16_6_12
+          path: ack_4.19_to_6.12.patch
