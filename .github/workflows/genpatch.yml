@@ -1,4 +1,4 @@
-name: Diff AOSP Tag With Our Repo
+name: Diff SM8250 Kernel vs AOSP Common Kernel
 
 on:
   workflow_dispatch:
@@ -8,9 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout our repo
+      - name: Checkout our SM8250 kernel
         uses: actions/checkout@v4
         with:
+          repository: "Yew12347/android_kernel_xiaomi_sm8250"
+          path: sm8250
           fetch-depth: 0
 
       - name: Clone AOSP common kernel tag
@@ -21,12 +23,12 @@ jobs:
             https://android.googlesource.com/kernel/common \
             aosp-common
 
-      - name: Generate full patch diff
+      - name: Generate full diff patch
         run: |
-          git diff --no-index aosp-common . > full_aosp_vs_ours.patch || true
+          git diff --no-index aosp-common sm8250 > full_aosp_vs_sm8250.patch || true
 
-      - name: Upload patch artifact
+      - name: Upload diff patch
         uses: actions/upload-artifact@v4
         with:
-          name: aosp-vs-ours-full-patch
-          path: full_aosp_vs_ours.patch
+          name: sm8250-vs-aosp-patch
+          path: full_aosp_vs_sm8250.patch
