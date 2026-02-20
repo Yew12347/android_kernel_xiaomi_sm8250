@@ -23,10 +23,7 @@ jobs:
 
       - name: Generate full patch diff
         run: |
-          git diff --no-index \
-            aosp-common \
-            . \
-            > full_aosp_vs_ours.patch
+          git diff --no-index aosp-common . > full_aosp_vs_ours.patch || true
 
       - name: Upload patch artifact
         uses: actions/upload-artifact@v4
