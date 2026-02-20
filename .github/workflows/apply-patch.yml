@@ -1,4 +1,4 @@
-name: Apply AOSP Patch
+name: Apply ACK 4.19 -> 6.12 Patch (merging branch)
 
 on:
   workflow_dispatch:
@@ -8,39 +8,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout our SM8250 kernel
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Download diff patch artifact
+      - name: Create merging branch
+        run: |
+          git checkout -b merging
+
+      - name: Download artifact from run
         uses: actions/download-artifact@v4
         with:
-          name: sm8250-vs-aosp-patch
+          name: linux419_vs_android16_6_12
+          run-id: 22210549878
           path: .
 
-      - name: Show patch summary
-        run: |
-          echo "Patch size:"
-          ls -lh *.patch
-          echo
-          echo "First 200 lines of patch:"
-          head -n 200 *.patch
+      - name: Unzip artifact
+        run: unzip linux419_vs_android16_6_12.zip
 
       - name: Apply patch
         run: |
-          git apply --reject --whitespace=fix *.patch || true
-
-      - name: Add applied changes
-        run: |
-          git add .
+          git apply --reject --whitespace=fix ack_4.19_to_6.12.patch || true
 
       - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git commit -m "Apply AOSP diff patch" || echo "No changes to commit"
+          git add .
+          git commit -m "Apply ACK 4.19 -> Android16 6.12 patch" || echo "Nothing to commit"
 
-      - name: Push to repo
-        run: |
-          git push origin HEAD
+      - name: Push merging branch
+        run: git push origin merging
