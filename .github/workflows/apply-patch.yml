@@ -1,0 +1,46 @@
+name: Apply AOSP Patch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout our SM8250 kernel
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download diff patch artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sm8250-vs-aosp-patch
+          path: .
+
+      - name: Show patch summary
+        run: |
+          echo "Patch size:"
+          ls -lh *.patch
+          echo
+          echo "First 200 lines of patch:"
+          head -n 200 *.patch
+
+      - name: Apply patch
+        run: |
+          git apply --reject --whitespace=fix *.patch || true
+
+      - name: Add applied changes
+        run: |
+          git add .
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git commit -m "Apply AOSP diff patch" || echo "No changes to commit"
+
+      - name: Push to repo
+        run: |
+          git push origin HEAD
