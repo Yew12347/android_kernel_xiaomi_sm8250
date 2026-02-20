@@ -1,0 +1,35 @@
+name: Diff AOSP Tag With Our Repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout our repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone AOSP common kernel tag
+        run: |
+          git clone --depth=1 \
+            --branch android16-6.12-2025-12_r22 \
+            --single-branch \
+            https://android.googlesource.com/kernel/common \
+            aosp-common
+
+      - name: Generate full patch diff
+        run: |
+          git diff --no-index \
+            aosp-common \
+            . \
+            > full_aosp_vs_ours.patch
+
+      - name: Upload patch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aosp-vs-ours-full-patch
+          path: full_aosp_vs_ours.patch
