@@ -14,15 +14,16 @@ jobs:
           fetch-depth: 0
 
       - name: Create merging branch
-        run: |
-          git checkout -b merging
+        run: git checkout -b merging
 
-      - name: Download artifact from run
-        uses: actions/download-artifact@v4
+      - name: Download artifact by ID (v5)
+        uses: actions/download-artifact@v5
         with:
-          name: linux419_vs_android16_6_12
-          run-id: 22210549878
+          artifact-ids: 5584183576
           path: .
+
+      - name: List files
+        run: ls -lh
 
       - name: Unzip artifact
         run: unzip linux419_vs_android16_6_12.zip
